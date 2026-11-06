@@ -490,29 +490,33 @@
       ]
     };
 
-    const DEMO_CONTRACT_TEXT = [
-      'MASTER SOFTWARE DEVELOPMENT AGREEMENT',
+    // Updated Sample Contract for the starter page "+ Load sample contract" button
+    const SAMPLE_STARTER_CONTRACT_TEXT = [
+      'STRATEGIC AI DATA LICENSING & CO-DEVELOPMENT AGREEMENT',
       '',
-      '1. PARTIES AND SCOPE',
-      'This Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.',
+      '1. PARTIES AND GRANT OF LICENSE',
+      'This Agreement is entered into by and between BioMed Diagnostics AB ("Licensor") and QuantAI Health Systems Inc. ("Licensee"). Licensor hereby grants Licensee a worldwide, non-exclusive, non-transferable license to ingest and train machine learning models on Licensor\'s anonymized clinical imaging dataset ("Licensed Data") solely for developing diagnostic triage algorithms.',
       '',
-      '2. TERM AND TERMINATION',
-      'This Agreement commences on May 1, 2026, and continues until terminated by either party upon ninety (90) days prior written notice. However, Client may terminate this Agreement immediately without notice if Contractor reassigns any key personnel without Client prior written consent.',
+      '2. ROYALTIES AND MINIMUM ANNUAL COMMITMENT',
+      'Licensee shall pay Licensor a running royalty of 8% of Net Revenue derived from any commercial product utilizing weights trained on the Licensed Data, subject to a non-refundable Minimum Annual Guarantee of $120,000 USD payable quarterly in advance.',
       '',
-      '3. FEES AND PAYMENT TERMS',
-      'Client shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.',
+      '3. MODEL WEIGHT OWNERSHIP & DERIVATIVE WORKS',
+      'While Licensor retains all title to the raw Licensed Data, all trained neural network parameters, fine-tuned weights, and diagnostic software outputs ("Trained Models") shall vest exclusively in Licensee. However, if Licensee fails to meet the Minimum Annual Guarantee, Licensee must immediately cease commercial distribution and purge all Trained Models.',
       '',
-      '4. INTELLECTUAL PROPERTY AND LIQUIDATED DAMAGES',
-      'All work product, source code, and documentation created by Contractor shall vest immediately in Client upon creation as work made for hire. In the event Contractor breaches the confidentiality or non-solicitation obligations herein, Contractor shall immediately pay Client $50,000 USD in liquidated damages per breach, without prejudice to Client right to seek injunctive relief.'
+      '4. PATIENT PRIVACY, GDPR & REGULATORY INDEMNITY',
+      'Licensor warrants that all Licensed Data has been fully anonymized in accordance with GDPR Recital 26. Notwithstanding the foregoing, Licensee shall indemnify and hold Licensor harmless up to $2,000,000 USD against any regulatory fines or third-party claims resulting from model inversion attacks or re-identification of patients caused by Licensee\'s deployment architecture.',
+      '',
+      '5. AUDIT RIGHTS AND GOVERNING LAW',
+      'Licensor may, upon fifteen (15) days\' written notice and no more than once per calendar year, appoint an independent CPA to audit Licensee\'s deployment logs and revenue records. If an underpayment exceeding 5% is discovered, Licensee shall bear the full cost of the audit plus 2% monthly compounded interest. Governed by the laws of England and Wales, with disputes resolved via LCIA arbitration in London.'
     ].join('\n');
 
-    // Pre-made Mock Register Database
+    // Pre-made Mock Register Database with varied clause counts (2, 3, 5, and 7 clauses)
     const CONTRACT_REGISTER = [
       {
         id: 'reg-msa-01',
         contractType: 'IT & Software',
         dateAdded: '2026-10-28',
-        contractTitle: 'Master Software Development Agreement',
+        contractTitle: 'Master Software Development & Cloud Operations Agreement',
         overallRisk: 'High',
         detectedPerspective: {
           userInput: 'NextGen Dev Studio LLC',
@@ -521,8 +525,31 @@
           counterparty: 'Apex Global Corp (Client)',
           matchConfidence: 'Exact Match'
         },
-        executiveSummary: "Analyzed from NextGen Dev Studio LLC's (Contractor) perspective: This agreement carries high commercial risk, including extended Net 60 payment terms, immediate IP transfer prior to invoice payment, and a strict $50,000 liquidated damages penalty.",
-        fullContractText: DEMO_CONTRACT_TEXT,
+        executiveSummary: "Analyzed from NextGen Dev Studio LLC's (Contractor) perspective: Comprehensive 7-section enterprise agreement carrying high commercial risk, including Net 60 payment terms, immediate IP transfer prior to payment, a $50,000 liquidated damages penalty, and uncapped third-party IP indemnification.",
+        fullContractText: [
+          'MASTER SOFTWARE DEVELOPMENT & CLOUD OPERATIONS AGREEMENT',
+          '',
+          '1. PARTIES AND SCOPE OF SERVICES',
+          'This Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.',
+          '',
+          '2. TERM AND TERMINATION',
+          'This Agreement commences on May 1, 2026, and continues until terminated by either party upon ninety (90) days prior written notice. However, Client may terminate this Agreement immediately without notice if Contractor reassigns any key personnel without Client prior written consent.',
+          '',
+          '3. FEES, INVOICING AND PAYMENT TERMS',
+          'Client shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.',
+          '',
+          '4. INTELLECTUAL PROPERTY AND LIQUIDATED DAMAGES',
+          'All work product, source code, and documentation created by Contractor shall vest immediately in Client upon creation as work made for hire. In the event Contractor breaches the confidentiality or non-solicitation obligations herein, Contractor shall immediately pay Client $50,000 USD in liquidated damages per breach, without prejudice to Client right to seek injunctive relief.',
+          '',
+          '5. DATA SECURITY & CYBER INCIDENT REPORTING',
+          'Contractor shall maintain ISO 27001 and SOC 2 Type II certifications throughout the Term. In the event of any suspected or actual unauthorized access to Client data, Contractor must notify Client CISO by telephone and email within four (4) hours of discovery and provide a root-cause forensic report within forty-eight (48) hours.',
+          '',
+          '6. INDEMNIFICATION AND LIMITATION OF LIABILITY',
+          'Contractor shall defend, indemnify, and hold harmless Client from any third-party claims alleging that the Deliverables infringe any patent, copyright, or trade secret, without any monetary cap. For all other claims, Contractor\'s aggregate liability shall be capped at the total fees paid in the twelve (12) months preceding the claim, whereas Client\'s liability is capped at three (3) months of fees.',
+          '',
+          '7. NON-SOLICITATION, GOVERNING LAW & ARBITRATION',
+          'During the Term and for twenty-four (24) months thereafter, Contractor shall not solicit or hire any employee or consultant of Client. This Agreement is governed by the laws of the State of New York, and any dispute shall be finally resolved by binding JAMS arbitration in New York County.'
+        ].join('\n'),
         categories: [
           {
             id: 'parties',
@@ -534,7 +561,7 @@
               'Engagement is tied to specific key personnel approved by the Client.',
               'Contractor cannot reassign key staff without prior written consent.'
             ],
-            originalText: '1. PARTIES AND SCOPE\nThis Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.'
+            originalText: '1. PARTIES AND SCOPE OF SERVICES\nThis Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.'
           },
           {
             id: 'termination',
@@ -558,7 +585,7 @@
               '$150 USD/hour billed monthly in arrears.',
               'Net 60 payment window.'
             ],
-            originalText: '3. FEES AND PAYMENT TERMS\nClient shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.'
+            originalText: '3. FEES, INVOICING AND PAYMENT TERMS\nClient shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.'
           },
           {
             id: 'ip-liability',
@@ -571,6 +598,42 @@
               '$50,000 USD fixed penalty per breach without requiring proof of actual damages.'
             ],
             originalText: '4. INTELLECTUAL PROPERTY AND LIQUIDATED DAMAGES\nAll work product, source code, and documentation created by Contractor shall vest immediately in Client upon creation as work made for hire. In the event Contractor breaches the confidentiality or non-solicitation obligations herein, Contractor shall immediately pay Client $50,000 USD in liquidated damages per breach, without prejudice to Client right to seek injunctive relief.'
+          },
+          {
+            id: 'data-security',
+            title: 'Data Security & 4-Hour Incident SLA',
+            icon: 'lock',
+            riskLevel: 'High',
+            summary: 'Requires continuous ISO 27001 and SOC 2 Type II compliance and an aggressive 4-hour incident notification window for any suspected breach.',
+            keyPoints: [
+              '4-hour notification deadline (even for suspected incidents) is operationally demanding.',
+              'Full forensic root-cause report required within 48 hours.'
+            ],
+            originalText: '5. DATA SECURITY & CYBER INCIDENT REPORTING\nContractor shall maintain ISO 27001 and SOC 2 Type II certifications throughout the Term. In the event of any suspected or actual unauthorized access to Client data, Contractor must notify Client CISO by telephone and email within four (4) hours of discovery and provide a root-cause forensic report within forty-eight (48) hours.'
+          },
+          {
+            id: 'indemnity',
+            title: 'Uncapped IP Indemnity & Asymmetric Liability',
+            icon: 'alert-triangle',
+            riskLevel: 'High',
+            summary: 'You bear uncapped financial liability for third-party IP infringement claims, and general liability caps are skewed (12 months for you vs. 3 months for the Client).',
+            keyPoints: [
+              'Uncapped indemnification for IP infringement claims.',
+              'Asymmetric general liability cap favors the Client (3 months vs. 12 months).'
+            ],
+            originalText: '6. INDEMNIFICATION AND LIMITATION OF LIABILITY\nContractor shall defend, indemnify, and hold harmless Client from any third-party claims alleging that the Deliverables infringe any patent, copyright, or trade secret, without any monetary cap. For all other claims, Contractor\'s aggregate liability shall be capped at the total fees paid in the twelve (12) months preceding the claim, whereas Client\'s liability is capped at three (3) months of fees.'
+          },
+          {
+            id: 'governing-law',
+            title: 'Non-Solicitation & NY Arbitration',
+            icon: 'scale',
+            riskLevel: 'Medium',
+            summary: 'Restricts you from hiring Client staff for 24 months post-termination and mandates JAMS arbitration in New York.',
+            keyPoints: [
+              'One-way 24-month non-solicitation restriction on Contractor.',
+              'New York governing law and binding JAMS arbitration.'
+            ],
+            originalText: '7. NON-SOLICITATION, GOVERNING LAW & ARBITRATION\nDuring the Term and for twenty-four (24) months thereafter, Contractor shall not solicit or hire any employee or consultant of Client. This Agreement is governed by the laws of the State of New York, and any dispute shall be finally resolved by binding JAMS arbitration in New York County.'
           }
         ]
       },
@@ -578,7 +641,7 @@
         id: 'reg-nda-02',
         contractType: 'NDA & Confidentiality',
         dateAdded: '2026-10-19',
-        contractTitle: 'Mutual Non-Disclosure Agreement – Project Aurora',
+        contractTitle: 'Short-Form Mutual Non-Disclosure Agreement – Project Aurora',
         overallRisk: 'Low',
         detectedPerspective: {
           userInput: 'Nordic Ventures AB',
@@ -587,70 +650,40 @@
           counterparty: 'Helios AI Labs Inc. (Counterparty)',
           matchConfidence: 'Exact Match'
         },
-        executiveSummary: 'Analyzed from Nordic Ventures AB\'s perspective: This is a well-balanced, standard mutual NDA with a reasonable 3-year confidentiality survival period and standard carve-outs for independently developed technology.',
+        executiveSummary: 'Analyzed from Nordic Ventures AB\'s perspective: A compact, 2-clause fast-track mutual NDA with standard carve-outs, a 3-year survival period, and Stockholm arbitration.',
         fullContractText: [
-          'MUTUAL NON-DISCLOSURE AGREEMENT',
+          'SHORT-FORM MUTUAL NON-DISCLOSURE AGREEMENT',
           '',
-          '1. PURPOSE AND PARTIES',
-          'This Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") for the purpose of evaluating a potential strategic investment and technology partnership ("Project Aurora").',
+          '1. PURPOSE, CONFIDENTIALITY & STANDARD EXCLUSIONS',
+          'This Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") to evaluate a potential strategic partnership ("Project Aurora"). "Confidential Information" means any non-public technical or business information disclosed by either party, excluding information that: (a) becomes publicly known through no breach; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.',
           '',
-          '2. CONFIDENTIAL INFORMATION & EXCLUSIONS',
-          '"Confidential Information" means any non-public technical, financial, or business information disclosed by either party. Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this NDA; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.',
-          '',
-          '3. TERM AND SURVIVAL',
-          'This NDA shall remain in effect for two (2) years from the Effective Date. Each party\'s confidentiality obligations shall survive for three (3) years following the date of disclosure, except for trade secrets which shall remain protected for so long as they qualify as trade secrets under applicable law.',
-          '',
-          '4. GOVERNING LAW',
-          'This NDA shall be governed by the laws of Sweden, with any disputes settled by arbitration at the Arbitration Institute of the Stockholm Chamber of Commerce (SCC).'
+          '2. TERM, SURVIVAL AND GOVERNING LAW',
+          'This NDA remains in effect for two (2) years, and confidentiality obligations survive for three (3) years following disclosure (trade secrets remain protected indefinitely under applicable law). This NDA is governed by the laws of Sweden, with disputes settled by arbitration at the Stockholm Chamber of Commerce (SCC).'
         ].join('\n'),
         categories: [
           {
-            id: 'nda-purpose',
-            title: 'Parties & Permitted Purpose',
-            icon: 'users',
-            riskLevel: 'Low',
-            summary: 'Mutual agreement between Nordic Ventures AB and Helios AI Labs Inc. strictly covering discussions for Project Aurora.',
-            keyPoints: [
-              'Protects both parties equally as Disclosing and Receiving Party.',
-              'Information may only be used to evaluate the Project Aurora partnership.'
-            ],
-            originalText: '1. PURPOSE AND PARTIES\nThis Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") for the purpose of evaluating a potential strategic investment and technology partnership ("Project Aurora").'
-          },
-          {
-            id: 'nda-exclusions',
-            title: 'Definition & Standard Carve-Outs',
+            id: 'nda-scope',
+            title: 'Purpose, Confidentiality & Carve-Outs',
             icon: 'lock',
             riskLevel: 'Low',
-            summary: 'Contains market-standard exclusions protecting your internal R&D, including independently developed knowledge and public domain information.',
+            summary: 'Mutual protection for Project Aurora discussions with clear, market-standard exclusions for independently developed technology and prior knowledge.',
             keyPoints: [
-              'Clear carve-out for independently developed software/research.',
-              'Prior known information is excluded from restrictions.'
+              'Protects both parties equally as Disclosing and Receiving Party.',
+              'Clear carve-out for independently developed software/research.'
             ],
-            originalText: '2. CONFIDENTIAL INFORMATION & EXCLUSIONS\n"Confidential Information" means any non-public technical, financial, or business information disclosed by either party. Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this NDA; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.'
+            originalText: '1. PURPOSE, CONFIDENTIALITY & STANDARD EXCLUSIONS\nThis Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") to evaluate a potential strategic partnership ("Project Aurora"). "Confidential Information" means any non-public technical or business information disclosed by either party, excluding information that: (a) becomes publicly known through no breach; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.'
           },
           {
-            id: 'nda-term',
-            title: 'Term & Survival Period',
-            icon: 'calendar',
-            riskLevel: 'Low',
-            summary: 'The agreement covers disclosures for 2 years, and confidentiality obligations last for 3 years per disclosure.',
-            keyPoints: [
-              '3-year survival period is standard for commercial tech evaluations.',
-              'Trade secrets remain protected indefinitely under statutory law.'
-            ],
-            originalText: '3. TERM AND SURVIVAL\nThis NDA shall remain in effect for two (2) years from the Effective Date. Each party\'s confidentiality obligations shall survive for three (3) years following the date of disclosure, except for trade secrets which shall remain protected for so long as they qualify as trade secrets under applicable law.'
-          },
-          {
-            id: 'nda-law',
-            title: 'Governing Law & Dispute Resolution',
+            id: 'nda-term-law',
+            title: 'Term, 3-Year Survival & Swedish Law',
             icon: 'scale',
             riskLevel: 'Low',
-            summary: 'Governed by Swedish law with SCC arbitration in Stockholm, providing home-court advantage for Nordic Ventures AB.',
+            summary: 'Covers disclosures for 2 years with a 3-year confidentiality survival period, governed by Swedish law and SCC arbitration in Stockholm.',
             keyPoints: [
-              'Swedish governing law applies.',
-              'Confidential arbitration via the Stockholm Chamber of Commerce (SCC).'
+              '3-year survival period is standard for commercial tech evaluations.',
+              'Home-court advantage in Stockholm via SCC arbitration.'
             ],
-            originalText: '4. GOVERNING LAW\nThis NDA shall be governed by the laws of Sweden, with any disputes settled by arbitration at the Arbitration Institute of the Stockholm Chamber of Commerce (SCC).'
+            originalText: '2. TERM, SURVIVAL AND GOVERNING LAW\nThis NDA remains in effect for two (2) years, and confidentiality obligations survive for three (3) years following disclosure (trade secrets remain protected indefinitely under applicable law). This NDA is governed by the laws of Sweden, with disputes settled by arbitration at the Stockholm Chamber of Commerce (SCC).'
           }
         ]
       },
@@ -667,7 +700,7 @@
           counterparty: 'CloudPulse Analytics Inc. (Vendor)',
           matchConfidence: 'Exact Match'
         },
-        executiveSummary: 'Analyzed from ScandiRetail Group AB\'s (Customer) perspective: The SLA uptime commitment (99.5%) is reasonable, but the automatic 36-month renewal lock-in and uncapped annual price increases after Year 1 present notable commercial risks.',
+        executiveSummary: 'Analyzed from ScandiRetail Group AB\'s (Customer) perspective: This 5-clause SaaS agreement offers a solid 99.5% uptime SLA and EU data residency, but the 36-month auto-renewal lock-in, uncapped price hikes, and 3-month liability cap require negotiation.',
         fullContractText: [
           'ENTERPRISE CLOUD SAAS SUBSCRIPTION AGREEMENT',
           '',
@@ -680,7 +713,10 @@
           '3. AUTO-RENEWAL & LOCK-IN',
           'The Initial Term is thirty-six (36) months. Unless Customer provides written notice of non-renewal at least one hundred and twenty (120) days prior to the end of the Initial Term, this Agreement shall automatically renew for successive 36-month periods.',
           '',
-          '4. LIMITATION OF LIABILITY',
+          '4. DATA PROCESSING, GDPR & EU RESIDENCY',
+          'Customer retains all ownership rights to Customer Data. Vendor shall process Customer Data solely within EU/EEA data centers (Frankfurt and Dublin) in compliance with GDPR Article 28, and shall provide a full data export in Parquet/JSON format within thirty (30) days of contract termination.',
+          '',
+          '5. LIMITATION OF LIABILITY',
           'Vendor\'s total cumulative liability arising out of this Agreement shall not exceed the fees paid by Customer in the three (3) months immediately preceding the claim, including for data breaches or GDPR violations.'
         ].join('\n'),
         categories: [
@@ -721,6 +757,18 @@
             originalText: '3. AUTO-RENEWAL & LOCK-IN\nThe Initial Term is thirty-six (36) months. Unless Customer provides written notice of non-renewal at least one hundred and twenty (120) days prior to the end of the Initial Term, this Agreement shall automatically renew for successive 36-month periods.'
           },
           {
+            id: 'saas-gdpr',
+            title: 'EU Data Residency & Exit Portability',
+            icon: 'lock',
+            riskLevel: 'Low',
+            summary: 'Guarantees strict EU/EEA data hosting (Frankfurt/Dublin) and a 30-day data export window upon termination.',
+            keyPoints: [
+              'All Customer Data stays inside EU/EEA data centers.',
+              'Guaranteed data export in standard machine-readable formats upon exit.'
+            ],
+            originalText: '4. DATA PROCESSING, GDPR & EU RESIDENCY\nCustomer retains all ownership rights to Customer Data. Vendor shall process Customer Data solely within EU/EEA data centers (Frankfurt and Dublin) in compliance with GDPR Article 28, and shall provide a full data export in Parquet/JSON format within thirty (30) days of contract termination.'
+          },
+          {
             id: 'saas-liability',
             title: 'Low Liability Cap (3 Months Fees)',
             icon: 'shield-alert',
@@ -730,7 +778,7 @@
               'Liability cap is only 3 months of fees (industry standard is 12 months).',
               'No super-cap or carve-out for GDPR / data protection breaches.'
             ],
-            originalText: '4. LIMITATION OF LIABILITY\nVendor\'s total cumulative liability arising out of this Agreement shall not exceed the fees paid by Customer in the three (3) months immediately preceding the claim, including for data breaches or GDPR violations.'
+            originalText: '5. LIMITATION OF LIABILITY\nVendor\'s total cumulative liability arising out of this Agreement shall not exceed the fees paid by Customer in the three (3) months immediately preceding the claim, including for data breaches or GDPR violations.'
           }
         ]
       },
@@ -747,46 +795,31 @@
           counterparty: 'Vanguard FinTech AB (Employer)',
           matchConfidence: 'Exact Match'
         },
-        executiveSummary: 'Analyzed from Erik Lindqvist\'s (Executive) perspective: Compensation and severance terms are competitive, but the 18-month post-termination non-compete clause and broad IP assignment covering off-duty inventions require attention.',
+        executiveSummary: 'Analyzed from Erik Lindqvist\'s (Executive) perspective: Concise 3-section executive contract with strong salary and severance terms, but an overly broad 18-month EEA non-compete and off-duty IP assignment.',
         fullContractText: [
           'SENIOR EXECUTIVE EMPLOYMENT AGREEMENT',
           '',
-          '1. POSITION AND COMPENSATION',
-          'Vanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer. Executive shall receive a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30% of annual base salary.',
+          '1. POSITION, SALARY AND SEVERANCE',
+          'Vanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer at a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30%. The mutual notice period is six (6) months, with an additional six (6) months of base salary payable as severance if terminated by Employer without cause.',
           '',
-          '2. NOTICE PERIOD AND SEVERANCE',
-          'The mutual notice period is six (6) months. If Employer terminates Executive without cause, Executive shall receive an additional six (6) months of base salary as severance pay.',
-          '',
-          '3. INTELLECTUAL PROPERTY ASSIGNMENT',
+          '2. INTELLECTUAL PROPERTY ASSIGNMENT',
           'All inventions, software, and concepts created by Executive during the period of employment—whether created during working hours or on Executive\'s personal time and equipment—shall belong exclusively to Employer.',
           '',
-          '4. POST-TERMINATION NON-COMPETE',
+          '3. POST-TERMINATION NON-COMPETE',
           'For a period of eighteen (18) months following termination of employment for any reason, Executive shall not engage in, work for, or advise any competing financial technology business within the European Economic Area (EEA).'
         ].join('\n'),
         categories: [
           {
             id: 'emp-comp',
-            title: 'Role & Compensation Package',
+            title: 'Compensation, Notice & Severance',
             icon: 'credit-card',
             riskLevel: 'Low',
-            summary: 'Base salary of 95,000 SEK/month as Chief Product Officer with up to 30% annual performance bonus.',
+            summary: 'Base salary of 95,000 SEK/month with up to 30% bonus, backed by a 6-month notice period and 6 months severance pay.',
             keyPoints: [
-              '95,000 SEK monthly base salary.',
-              'Up to 30% annual target bonus.'
+              '95,000 SEK monthly base salary + 30% target bonus.',
+              '12 months total financial protection (6m notice + 6m severance) if terminated without cause.'
             ],
-            originalText: '1. POSITION AND COMPENSATION\nVanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer. Executive shall receive a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30% of annual base salary.'
-          },
-          {
-            id: 'emp-notice',
-            title: 'Notice Period & Severance',
-            icon: 'calendar',
-            riskLevel: 'Low',
-            summary: 'Provides a 6-month mutual notice period plus 6 months of severance pay if terminated without cause.',
-            keyPoints: [
-              '6 months mutual notice period.',
-              '6 months severance pay upon termination without cause (12 months total protection).'
-            ],
-            originalText: '2. NOTICE PERIOD AND SEVERANCE\nThe mutual notice period is six (6) months. If Employer terminates Executive without cause, Executive shall receive an additional six (6) months of base salary as severance pay.'
+            originalText: '1. POSITION, SALARY AND SEVERANCE\nVanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer at a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30%. The mutual notice period is six (6) months, with an additional six (6) months of base salary payable as severance if terminated by Employer without cause.'
           },
           {
             id: 'emp-ip',
@@ -796,21 +829,21 @@
             summary: 'Employer claims ownership over all inventions created even during your personal time on personal equipment.',
             keyPoints: [
               'Sweeping IP clause covers personal side projects created outside working hours.',
-              'Recommend narrowing to inventions related to Employer\'s business.'
+              'Recommend narrowing to inventions demonstrably related to Employer\'s business.'
             ],
-            originalText: '3. INTELLECTUAL PROPERTY ASSIGNMENT\nAll inventions, software, and concepts created by Executive during the period of employment—whether created during working hours or on Executive\'s personal time and equipment—shall belong exclusively to Employer.'
+            originalText: '2. INTELLECTUAL PROPERTY ASSIGNMENT\nAll inventions, software, and concepts created by Executive during the period of employment—whether created during working hours or on Executive\'s personal time and equipment—shall belong exclusively to Employer.'
           },
           {
             id: 'emp-noncompete',
             title: '18-Month EEA Non-Compete',
             icon: 'alert-triangle',
             riskLevel: 'High',
-            summary: 'Restricts you from working for any FinTech competitor across the entire EEA for 18 months after leaving, with no mention of mandatory garden-leave compensation.',
+            summary: 'Restricts you from working for any FinTech competitor across the entire EEA for 18 months after leaving, without specifying mandatory garden-leave compensation.',
             keyPoints: [
               '18-month duration exceeds the typical 6–12 month Swedish standard.',
-              'Lacks explicit compensation during the restriction period ( typically 60% of salary).'
+              'Lacks explicit compensation during the restriction period (typically 60% of salary).'
             ],
-            originalText: '4. POST-TERMINATION NON-COMPETE\nFor a period of eighteen (18) months following termination of employment for any reason, Executive shall not engage in, work for, or advise any competing financial technology business within the European Economic Area (EEA).'
+            originalText: '3. POST-TERMINATION NON-COMPETE\nFor a period of eighteen (18) months following termination of employment for any reason, Executive shall not engage in, work for, or advise any competing financial technology business within the European Economic Area (EEA).'
           }
         ]
       }
@@ -1400,9 +1433,9 @@
     }
 
     function fillSampleText() {
-      document.getElementById('contractTextarea').value = DEMO_CONTRACT_TEXT;
+      document.getElementById('contractTextarea').value = SAMPLE_STARTER_CONTRACT_TEXT;
       if (!document.getElementById('userPartyInput').value.trim()) {
-        document.getElementById('userPartyInput').value = 'NextGen Dev Studio';
+        document.getElementById('userPartyInput').value = 'QuantAI Health Systems Inc.';
       }
     }
 
