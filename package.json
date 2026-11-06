@@ -1,6 +1,6 @@
 {
   "name": "easyclause-byok",
-  "version": "8.0.0",
+  "version": "9.0.0",
   "description": "AI-powered contract analysis with BYOK, Dynamic POV Detection, and Contract Register",
   "main": "server.js",
   "scripts": {
