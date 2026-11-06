@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EasyClause – AI Contract Analysis & Register</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="resetToUpload()">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm">
+          <i data-lucide="scale" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="font-bold text-lg tracking-tight text-slate-900">EasyClause</span>
+          <span class="ml-2 text-xs font-medium px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">By Alfred Stengard</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <button type="button" id="navRegisterBtn" onclick="openRegisterView()" class="text-sm font-medium text-slate-700 hover:text-indigo-600 px-3 py-2 rounded-xl hover:bg-slate-100 transition flex items-center gap-2">
+          <i data-lucide="folder-kanban" class="w-4 h-4 text-indigo-600"></i>
+          <span>Contract Register</span>
+          <span id="registerCountBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">4</span>
+        </button>
+
+        <button type="button" onclick="loadDemoResult()" class="hidden sm:flex text-sm font-medium text-slate-600 hover:text-indigo-600 px-3 py-2 rounded-xl hover:bg-slate-100 transition items-center gap-1.5">
+          <i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i>
+          <span>Quick Demo</span>
+        </button>
+
+        <button type="button" onclick="toggleApiModal(true)" id="apiStatusBtn" class="text-sm font-medium px-3.5 py-2 rounded-xl border transition flex items-center gap-2 bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200">
+          <span id="apiStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <i data-lucide="key-round" class="w-4 h-4"></i>
+          <span id="apiStatusText" class="hidden sm:inline">API Key (BYOK)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Error Banner -->
+    <div id="errorBanner" class="hidden mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 flex items-start justify-between gap-3">
+      <div class="flex items-start gap-3">
+        <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 shrink-0 mt-0.5"></i>
+        <p id="errorText" class="text-sm font-medium"></p>
+      </div>
+      <button type="button" onclick="hideError()" class="text-red-500 hover:text-red-700">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- STEP 1: UPLOAD VIEW -->
+    <section id="uploadView" class="max-w-3xl mx-auto">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight mb-3">
+          Understand any contract in seconds
+        </h1>
+        <p class="text-slate-600 text-base sm:text-lg">
+          Upload a PDF, paste contract text, or explore the pre-loaded <button type="button" onclick="openRegisterView()" class="text-indigo-600 font-semibold underline hover:text-indigo-800">Contract Register</button>.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 sm:p-8">
+
+        <!-- Input Mode Tabs -->
+        <div class="flex rounded-xl bg-slate-100 p-1 mb-6">
+          <button type="button" id="tabPdf" onclick="switchInputTab('pdf')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-2">
+            <i data-lucide="file-up" class="w-4 h-4"></i>
+            Upload PDF
+          </button>
+          <button type="button" id="tabText" onclick="switchInputTab('text')" class="flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            Paste Contract Text
+          </button>
+        </div>
+
+        <!-- Drag & Drop PDF Area -->
+        <div id="pdfInputArea">
+          <label
+            id="dropZone"
+            for="pdfFileInput"
+            class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl p-10 cursor-pointer hover:border-indigo-500 hover:bg-indigo-50/40 transition text-center"
+          >
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-4">
+              <i data-lucide="upload-cloud" class="w-7 h-7"></i>
+            </div>
+            <p class="text-base font-semibold text-slate-800 mb-1" id="fileNameDisplay">
+              Drag and drop your PDF contract here, or click to browse
+            </p>
+            <p class="text-xs text-slate-500">Supports searchable PDF documents up to 10 MB</p>
+            <input id="pdfFileInput" type="file" accept="application/pdf" class="hidden" onchange="handleFileSelect(event)" />
+          </label>
+        </div>
+
+        <!-- Textarea for Pasted Contract Text -->
+        <div id="textInputArea" class="hidden">
+          <div class="flex justify-between items-center mb-2">
+            <label for="contractTextarea" class="text-xs font-semibold uppercase tracking-wider text-slate-500">Contract Text</label>
+            <button type="button" onclick="fillSampleText()" class="text-xs font-medium text-indigo-600 hover:text-indigo-800">
+              + Load sample contract
+            </button>
+          </div>
+          <textarea
+            id="contractTextarea"
+            rows="9"
+            placeholder="Paste the full contract text here..."
+            class="w-full rounded-xl border border-slate-300 p-4 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+          ></textarea>
+        </div>
+
+        <!-- Party Auto-Detection Input -->
+        <div class="my-6 bg-indigo-50/60 border border-indigo-100 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="userPartyInput" class="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+              <i data-lucide="building-2" class="w-4 h-4 text-indigo-600"></i>
+              <span>Your Organization / Party Name </span>
+            </label>
+          </div>
+          <p class="text-xs text-slate-600 mb-3">
+            Enter your company or personal name. The AI will automatically detect which party role you represent and evaluate all risks from your point of view.
+          </p>
+          <input
+            id="userPartyInput"
+            type="text"
+            placeholder="leave blank for a neutral, balanced review"
+            class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-100">
+          <div class="text-xs text-slate-500 flex items-center gap-2">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>Your API key is stored strictly locally in your browser.</span>
+          </div>
+          <button
+            type="button"
+            onclick="analyzeContract()"
+            class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm shadow-sm transition flex items-center justify-center gap-2"
+          >
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+            <span>Analyze Contract</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTRACT REGISTER VIEW (SEARCHABLE MOCK + SESSION ARCHIVE) -->
+    <section id="registerView" class="hidden space-y-6">
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">Contract Repository</span>
+              <span class="text-xs text-slate-400">Interactive Demo Showcase</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Saved Agreements Register</h1>
+            <p class="text-sm text-slate-600 mt-1">
+              Search, filter, and inspect pre-loaded commercial agreements—or view contracts you have analyzed during this session.
+            </p>
+          </div>
+          <button
+            type="button"
+            onclick="resetToUpload()"
+            class="self-start md:self-center shrink-0 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold shadow-xs transition flex items-center gap-2"
+          >
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Upload New Agreement</span>
+          </button>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-6 relative">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+            <input
+              id="registerSearchInput"
+              type="text"
+              oninput="renderRegisterList()"
+              placeholder="Search by title, party name, keyword, or clause..."
+              class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div class="sm:col-span-3">
+            <select
+              id="registerTypeFilter"
+              onchange="renderRegisterList()"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            >
+              <option value="all">All Contract Types</option>
+              <option value="IT & Software">IT & Software</option>
+              <option value="NDA & Confidentiality">NDA & Confidentiality</option>
+              <option value="Employment & HR">Employment & HR</option>
+              <option value="Real Estate & Lease">Real Estate & Lease</option>
+              <option value="Custom Upload">Custom Uploads</option>
+            </select>
+          </div>
+
+          <div class="sm:col-span-3">
+            <select
+              id="registerRiskFilter"
+              onchange="renderRegisterList()"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+            >
+              <option value="all">All Risk Levels</option>
+              <option value="High">High Risk</option>
+              <option value="Medium">Medium Risk</option>
+              <option value="Low">Low Risk</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register Cards Grid -->
+      <div id="registerGrid" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+    </section>
+
+    <!-- LOADING VIEW -->
+    <section id="loadingView" class="hidden max-w-xl mx-auto py-20 text-center">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-600 text-white mb-6 shadow-lg animate-bounce">
+        <i data-lucide="sparkles" class="w-8 h-8"></i>
+      </div>
+      <h2 class="text-2xl font-bold text-slate-900 mb-2">AI is analyzing your contract...</h2>
+      <p class="text-slate-600 text-sm mb-6" id="loadingSubtext">
+        Detecting your party role, evaluating legal risks from your POV, and structuring clauses.
+      </p>
+      <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+        <div class="bg-indigo-600 h-full w-2/3 animate-pulse rounded-full"></div>
+      </div>
+    </section>
+
+    <!-- STEP 2: DASHBOARD VIEW -->
+    <section id="dashboardView" class="hidden space-y-6">
+      <!-- Executive Summary & POV Detection Card -->
+      <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <h2 id="resContractTitle" class="text-2xl font-bold text-slate-900">Contract Analysis</h2>
+              <span id="resOverallRisk" class="text-xs font-semibold px-3 py-1 rounded-full"></span>
+            </div>
+            <p id="resExecutiveSummary" class="text-sm text-slate-600 mt-2 max-w-4xl"></p>
+          </div>
+          <div class="flex items-center gap-2.5 self-start md:self-center shrink-0">
+            <button
+              type="button"
+              onclick="openRegisterView()"
+              class="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-sm font-medium transition flex items-center gap-1.5"
+            >
+              <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+              <span>Back to Register</span>
+            </button>
+            <button
+              type="button"
+              onclick="resetToUpload()"
+              class="px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm font-medium transition flex items-center gap-2"
+            >
+              <i data-lucide="arrow-left" class="w-4 h-4"></i>
+              <span>New Analysis</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Detected POV Bar -->
+        <div class="mt-4 pt-1 flex flex-wrap items-center justify-between gap-4 text-xs">
+          <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span class="font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <i data-lucide="user-check" class="w-4 h-4 text-indigo-600"></i>
+              <span>Analysis Point of View (POV):</span>
+            </span>
+            <span id="povMatchedEntity" class="font-semibold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200"></span>
+            <span id="povDefinedRole" class="font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-200"></span>
+            <span id="povCounterparty" class="text-slate-500"></span>
+          </div>
+          <span id="povConfidenceBadge" class="font-medium px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"></span>
+        </div>
+      </div>
+
+      <!-- Two-Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Left Column: Category List -->
+        <aside class="lg:col-span-4 space-y-2.5" id="categoryList"></aside>
+
+        <!-- Right Column: Detail View (Dynamic: AI Summary OR Full Contract Reader) -->
+        <div class="lg:col-span-8 space-y-6">
+          
+          <!-- State 1: Category Detail View (AI Summary & Original Text) -->
+          <div id="categoryDetailState" class="space-y-6">
+            <!-- Section 1: AI Summary -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+              <div class="flex items-center justify-between gap-4 mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <i id="detailIcon" data-lucide="file-text" class="w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <span class="text-xs font-semibold uppercase tracking-wider text-indigo-600">AI Summary</span>
+                    <h3 id="detailTitle" class="text-xl font-bold text-slate-900"></h3>
+                  </div>
+                </div>
+                <span id="detailRiskBadge" class="text-xs font-semibold px-3 py-1 rounded-full"></span>
+              </div>
+
+              <p id="detailSummary" class="text-slate-700 leading-relaxed text-base mb-6"></p>
+
+              <div class="bg-slate-50 rounded-xl p-4 border border-slate-200/80">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">Key Takeaways for Your Party</h4>
+                <ul id="detailKeyPoints" class="space-y-2 text-sm text-slate-700"></ul>
+              </div>
+            </div>
+
+            <!-- Section 2: Original Text (Verbatim Quote) -->
+            <div class="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2.5">
+                  <i data-lucide="quote" class="w-5 h-5 text-slate-400"></i>
+                  <h4 class="text-base font-bold text-slate-900">Original Text (Verbatim Contract Excerpt)</h4>
+                </div>
+                <span class="text-xs text-slate-400">Always verify against source document</span>
+              </div>
+              <blockquote
+                id="detailOriginalText"
+                class="bg-slate-900 text-slate-100 font-mono text-xs sm:text-sm leading-relaxed p-5 rounded-xl border-l-4 border-indigo-500 whitespace-pre-line"
+              ></blockquote>
+            </div>
+          </div>
+
+          <!-- State 2: Full Agreement Reader Box -->
+          <div id="fullAgreementState" class="hidden bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 mb-4 border-b border-slate-100">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-slate-800 text-white flex items-center justify-center">
+                  <i data-lucide="scroll-text" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-slate-900">Full Agreement Document</h3>
+                  <p class="text-xs text-slate-500">Complete unedited text extracted from your uploaded or pasted contract</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="relative">
+                  <input
+                    id="fullTextSearchInput"
+                    type="text"
+                    oninput="highlightFullText()"
+                    placeholder="Search in full contract..."
+                    class="rounded-xl border border-slate-300 pl-3 pr-8 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                  <span id="searchMatchCount" class="text-[11px] text-slate-400 ml-1"></span>
+                </div>
+                <button
+                  type="button"
+                  onclick="copyFullAgreement()"
+                  id="copyFullTextBtn"
+                  class="px-3 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-xs font-medium text-slate-700 transition flex items-center gap-1.5"
+                >
+                  <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                  <span>Copy</span>
+                </button>
+              </div>
+            </div>
+
+            <div
+              id="fullAgreementContent"
+              class="bg-slate-50 border border-slate-200 rounded-xl p-6 h-[600px] overflow-y-auto font-mono text-xs sm:text-sm text-slate-800 leading-relaxed whitespace-pre-wrap"
+            ></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- BYOK API KEY MODAL -->
+  <div id="apiModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-200">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <i data-lucide="key-round" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900">AI Settings (BYOK)</h3>
+        </div>
+        <button type="button" onclick="toggleApiModal(false)" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-xs text-slate-500 mb-5">
+        Select your preferred AI provider and paste your API key. Your key is stored strictly inside your browser's <code class="bg-slate-100 px-1 py-0.5 rounded">localStorage</code>.
+      </p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">AI Provider</label>
+          <select id="providerSelect" onchange="updateModelOptions()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="gemini">Google Gemini (Free tier available via AI Studio)</option>
+            <option value="openai">OpenAI (ChatGPT)</option>
+            <option value="claude">Anthropic Claude</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Model</label>
+          <select id="modelSelect" onchange="toggleCustomModelInput()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"></select>
+          <input
+            id="customModelInput"
+            type="text"
+            placeholder="e.g. gemini-3.8-flash"
+            class="hidden mt-2 w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">API Key</label>
+          <input
+            id="apiKeyInput"
+            type="password"
+            placeholder="AIzaSy... / sk-... / sk-ant-..."
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+          />
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center justify-between gap-3">
+        <button type="button" onclick="clearApiSettings()" class="text-xs text-red-600 hover:underline font-medium">
+          Clear saved key
+        </button>
+        <div class="flex gap-2">
+          <button type="button" onclick="toggleApiModal(false)" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100">
+            Cancel
+          </button>
+          <button type="button" onclick="saveApiSettings()" class="px-4 py-2 rounded-xl text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white">
+            Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MODELS = {
+      gemini: [
+        { id: 'gemini-3.8-flash', label: 'Gemini 3.8 Flash (Latest & Recommended)' },
+        { id: 'gemini-3.8-pro', label: 'Gemini 3.8 Pro (Deep Legal Reasoning)' },
+        { id: 'custom', label: 'Custom Model ID...' }
+      ],
+      openai: [
+        { id: 'gpt-4o-mini', label: 'GPT-4o Mini (Fast & Cost-effective)' },
+        { id: 'gpt-4o', label: 'GPT-4o (High Precision)' },
+        { id: 'custom', label: 'Custom Model ID...' }
+      ],
+      claude: [
+        { id: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet (Recommended)' },
+        { id: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku (Fast)' },
+        { id: 'custom', label: 'Custom Model ID...' }
+      ]
+    };
+
+    const DEMO_CONTRACT_TEXT = [
+      'MASTER SOFTWARE DEVELOPMENT AGREEMENT',
+      '',
+      '1. PARTIES AND SCOPE',
+      'This Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.',
+      '',
+      '2. TERM AND TERMINATION',
+      'This Agreement commences on May 1, 2026, and continues until terminated by either party upon ninety (90) days prior written notice. However, Client may terminate this Agreement immediately without notice if Contractor reassigns any key personnel without Client prior written consent.',
+      '',
+      '3. FEES AND PAYMENT TERMS',
+      'Client shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.',
+      '',
+      '4. INTELLECTUAL PROPERTY AND LIQUIDATED DAMAGES',
+      'All work product, source code, and documentation created by Contractor shall vest immediately in Client upon creation as work made for hire. In the event Contractor breaches the confidentiality or non-solicitation obligations herein, Contractor shall immediately pay Client $50,000 USD in liquidated damages per breach, without prejudice to Client right to seek injunctive relief.'
+    ].join('\n');
+
+    // Pre-made Mock Register Database
+    const CONTRACT_REGISTER = [
+      {
+        id: 'reg-msa-01',
+        contractType: 'IT & Software',
+        dateAdded: '2026-10-28',
+        contractTitle: 'Master Software Development Agreement',
+        overallRisk: 'High',
+        detectedPerspective: {
+          userInput: 'NextGen Dev Studio LLC',
+          matchedEntity: 'NextGen Dev Studio LLC',
+          definedRole: 'Contractor',
+          counterparty: 'Apex Global Corp (Client)',
+          matchConfidence: 'Exact Match'
+        },
+        executiveSummary: "Analyzed from NextGen Dev Studio LLC's (Contractor) perspective: This agreement carries high commercial risk, including extended Net 60 payment terms, immediate IP transfer prior to invoice payment, and a strict $50,000 liquidated damages penalty.",
+        fullContractText: DEMO_CONTRACT_TEXT,
+        categories: [
+          {
+            id: 'parties',
+            title: 'Parties & Scope of Work',
+            icon: 'users',
+            riskLevel: 'Low',
+            summary: "You (NextGen Dev Studio LLC) are obligated to design, develop, and deliver custom cloud software according to Apex Global Corp's specifications.",
+            keyPoints: [
+              'Engagement is tied to specific key personnel approved by the Client.',
+              'Contractor cannot reassign key staff without prior written consent.'
+            ],
+            originalText: '1. PARTIES AND SCOPE\nThis Master Software Development Agreement ("Agreement") is entered into by and between Apex Global Corp ("Client") and NextGen Dev Studio LLC ("Contractor"). Contractor agrees to design, develop, and deliver custom cloud software solutions according to Client specifications.'
+          },
+          {
+            id: 'termination',
+            title: 'Term & Termination',
+            icon: 'calendar',
+            riskLevel: 'Medium',
+            summary: "While standard termination requires 90 days' notice, the Client can terminate your contract immediately if you reassign any key staff without prior written consent.",
+            keyPoints: [
+              '90-day mutual notice period for standard termination.',
+              'Immediate termination right for the Client upon unauthorized staff changes.'
+            ],
+            originalText: '2. TERM AND TERMINATION\nThis Agreement commences on May 1, 2026, and continues until terminated by either party upon ninety (90) days prior written notice. However, Client may terminate this Agreement immediately without notice if Contractor reassigns any key personnel without Client prior written consent.'
+          },
+          {
+            id: 'payment',
+            title: 'Fees & Payment Terms',
+            icon: 'credit-card',
+            riskLevel: 'Medium',
+            summary: 'Your hourly rate is $150 USD billed monthly in arrears, but Net 60 payment terms tie up your working capital for two full months after invoicing.',
+            keyPoints: [
+              '$150 USD/hour billed monthly in arrears.',
+              'Net 60 payment window.'
+            ],
+            originalText: '3. FEES AND PAYMENT TERMS\nClient shall pay Contractor a time-and-materials rate of $150 USD per hour. Contractor shall invoice Client monthly in arrears. All undisputed invoices are payable within sixty (60) days of receipt (Net 60). Late payments shall accrue interest at 1.5% per month.'
+          },
+          {
+            id: 'ip-liability',
+            title: 'IP Rights & Liquidated Damages',
+            icon: 'shield-alert',
+            riskLevel: 'High',
+            summary: 'You transfer all IP immediately upon creation (even before invoices are paid) and face a strict $50,000 USD fixed penalty per breach of confidentiality or non-solicitation.',
+            keyPoints: [
+              'Client owns all code immediately upon creation (even prior to invoice payment).',
+              '$50,000 USD fixed penalty per breach without requiring proof of actual damages.'
+            ],
+            originalText: '4. INTELLECTUAL PROPERTY AND LIQUIDATED DAMAGES\nAll work product, source code, and documentation created by Contractor shall vest immediately in Client upon creation as work made for hire. In the event Contractor breaches the confidentiality or non-solicitation obligations herein, Contractor shall immediately pay Client $50,000 USD in liquidated damages per breach, without prejudice to Client right to seek injunctive relief.'
+          }
+        ]
+      },
+      {
+        id: 'reg-nda-02',
+        contractType: 'NDA & Confidentiality',
+        dateAdded: '2026-10-19',
+        contractTitle: 'Mutual Non-Disclosure Agreement – Project Aurora',
+        overallRisk: 'Low',
+        detectedPerspective: {
+          userInput: 'Nordic Ventures AB',
+          matchedEntity: 'Nordic Ventures AB',
+          definedRole: 'Disclosing & Receiving Party',
+          counterparty: 'Helios AI Labs Inc. (Counterparty)',
+          matchConfidence: 'Exact Match'
+        },
+        executiveSummary: 'Analyzed from Nordic Ventures AB\'s perspective: This is a well-balanced, standard mutual NDA with a reasonable 3-year confidentiality survival period and standard carve-outs for independently developed technology.',
+        fullContractText: [
+          'MUTUAL NON-DISCLOSURE AGREEMENT',
+          '',
+          '1. PURPOSE AND PARTIES',
+          'This Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") for the purpose of evaluating a potential strategic investment and technology partnership ("Project Aurora").',
+          '',
+          '2. CONFIDENTIAL INFORMATION & EXCLUSIONS',
+          '"Confidential Information" means any non-public technical, financial, or business information disclosed by either party. Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this NDA; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.',
+          '',
+          '3. TERM AND SURVIVAL',
+          'This NDA shall remain in effect for two (2) years from the Effective Date. Each party\'s confidentiality obligations shall survive for three (3) years following the date of disclosure, except for trade secrets which shall remain protected for so long as they qualify as trade secrets under applicable law.',
+          '',
+          '4. GOVERNING LAW',
+          'This NDA shall be governed by the laws of Sweden, with any disputes settled by arbitration at the Arbitration Institute of the Stockholm Chamber of Commerce (SCC).'
+        ].join('\n'),
+        categories: [
+          {
+            id: 'nda-purpose',
+            title: 'Parties & Permitted Purpose',
+            icon: 'users',
+            riskLevel: 'Low',
+            summary: 'Mutual agreement between Nordic Ventures AB and Helios AI Labs Inc. strictly covering discussions for Project Aurora.',
+            keyPoints: [
+              'Protects both parties equally as Disclosing and Receiving Party.',
+              'Information may only be used to evaluate the Project Aurora partnership.'
+            ],
+            originalText: '1. PURPOSE AND PARTIES\nThis Mutual Non-Disclosure Agreement ("NDA") is entered into between Nordic Ventures AB ("Nordic") and Helios AI Labs Inc. ("Helios") for the purpose of evaluating a potential strategic investment and technology partnership ("Project Aurora").'
+          },
+          {
+            id: 'nda-exclusions',
+            title: 'Definition & Standard Carve-Outs',
+            icon: 'lock',
+            riskLevel: 'Low',
+            summary: 'Contains market-standard exclusions protecting your internal R&D, including independently developed knowledge and public domain information.',
+            keyPoints: [
+              'Clear carve-out for independently developed software/research.',
+              'Prior known information is excluded from restrictions.'
+            ],
+            originalText: '2. CONFIDENTIAL INFORMATION & EXCLUSIONS\n"Confidential Information" means any non-public technical, financial, or business information disclosed by either party. Confidential Information does not include information that: (a) is or becomes publicly known through no breach of this NDA; (b) was rightfully in the receiving party\'s possession prior to disclosure; or (c) is independently developed without reference to the disclosing party\'s Confidential Information.'
+          },
+          {
+            id: 'nda-term',
+            title: 'Term & Survival Period',
+            icon: 'calendar',
+            riskLevel: 'Low',
+            summary: 'The agreement covers disclosures for 2 years, and confidentiality obligations last for 3 years per disclosure.',
+            keyPoints: [
+              '3-year survival period is standard for commercial tech evaluations.',
+              'Trade secrets remain protected indefinitely under statutory law.'
+            ],
+            originalText: '3. TERM AND SURVIVAL\nThis NDA shall remain in effect for two (2) years from the Effective Date. Each party\'s confidentiality obligations shall survive for three (3) years following the date of disclosure, except for trade secrets which shall remain protected for so long as they qualify as trade secrets under applicable law.'
+          },
+          {
+            id: 'nda-law',
+            title: 'Governing Law & Dispute Resolution',
+            icon: 'scale',
+            riskLevel: 'Low',
+            summary: 'Governed by Swedish law with SCC arbitration in Stockholm, providing home-court advantage for Nordic Ventures AB.',
+            keyPoints: [
+              'Swedish governing law applies.',
+              'Confidential arbitration via the Stockholm Chamber of Commerce (SCC).'
+            ],
+            originalText: '4. GOVERNING LAW\nThis NDA shall be governed by the laws of Sweden, with any disputes settled by arbitration at the Arbitration Institute of the Stockholm Chamber of Commerce (SCC).'
+          }
+        ]
+      },
+      {
+        id: 'reg-saas-03',
+        contractType: 'IT & Software',
+        dateAdded: '2026-10-12',
+        contractTitle: 'Enterprise Cloud SaaS Subscription Agreement',
+        overallRisk: 'Medium',
+        detectedPerspective: {
+          userInput: 'ScandiRetail Group AB',
+          matchedEntity: 'ScandiRetail Group AB',
+          definedRole: 'Customer',
+          counterparty: 'CloudPulse Analytics Inc. (Vendor)',
+          matchConfidence: 'Exact Match'
+        },
+        executiveSummary: 'Analyzed from ScandiRetail Group AB\'s (Customer) perspective: The SLA uptime commitment (99.5%) is reasonable, but the automatic 36-month renewal lock-in and uncapped annual price increases after Year 1 present notable commercial risks.',
+        fullContractText: [
+          'ENTERPRISE CLOUD SAAS SUBSCRIPTION AGREEMENT',
+          '',
+          '1. SUBSCRIPTION SERVICES & UPTIME SLA',
+          'CloudPulse Analytics Inc. ("Vendor") grants ScandiRetail Group AB ("Customer") a non-exclusive right to access the CloudPulse Platform. Vendor guarantees a monthly system uptime of 99.5%. If uptime falls below 99.5%, Customer is entitled to a 10% service credit for that month.',
+          '',
+          '2. SUBSCRIPTION FEES & PRICE INCREASES',
+          'Customer shall pay an annual subscription fee of €48,000 EUR billed annually in advance. Vendor reserves the right to increase subscription fees upon each renewal term by giving thirty (30) days\' prior notice, without any percentage cap.',
+          '',
+          '3. AUTO-RENEWAL & LOCK-IN',
+          'The Initial Term is thirty-six (36) months. Unless Customer provides written notice of non-renewal at least one hundred and twenty (120) days prior to the end of the Initial Term, this Agreement shall automatically renew for successive 36-month periods.',
+          '',
+          '4. LIMITATION OF LIABILITY',
+          'Vendor\'s total cumulative liability arising out of this Agreement shall not exceed the fees paid by Customer in the three (3) months immediately preceding the claim, including for data breaches or GDPR violations.'
+        ].join('\n'),
+        categories: [
+          {
+            id: 'saas-sla',
+            title: 'Service Levels & Uptime SLA',
+            icon: 'file-text',
+            riskLevel: 'Low',
+            summary: 'Vendor commits to 99.5% monthly uptime, offering a 10% monthly credit if availability drops below threshold.',
+            keyPoints: [
+              '99.5% monthly uptime guarantee.',
+              'Sole remedy for downtime is a 10% service credit (no termination right for chronic outages).'
+            ],
+            originalText: '1. SUBSCRIPTION SERVICES & UPTIME SLA\nCloudPulse Analytics Inc. ("Vendor") grants ScandiRetail Group AB ("Customer") a non-exclusive right to access the CloudPulse Platform. Vendor guarantees a monthly system uptime of 99.5%. If uptime falls below 99.5%, Customer is entitled to a 10% service credit for that month.'
+          },
+          {
+            id: 'saas-pricing',
+            title: 'Subscription Fees & Uncapped Increases',
+            icon: 'credit-card',
+            riskLevel: 'Medium',
+            summary: 'Annual fee is €48,000 paid upfront, but Vendor can raise prices at renewal without any CPI or percentage cap.',
+            keyPoints: [
+              '€48,000 EUR annual upfront commitment.',
+              'No cap on price hikes at renewal (negotiate a 3–5% max annual uplift).'
+            ],
+            originalText: '2. SUBSCRIPTION FEES & PRICE INCREASES\nCustomer shall pay an annual subscription fee of €48,000 EUR billed annually in advance. Vendor reserves the right to increase subscription fees upon each renewal term by giving thirty (30) days\' prior notice, without any percentage cap.'
+          },
+          {
+            id: 'saas-renewal',
+            title: '36-Month Auto-Renewal Lock-In',
+            icon: 'calendar',
+            riskLevel: 'High',
+            summary: 'Requires a 120-day cancellation notice before the 3-year term ends, or you are automatically locked into another 3-year term.',
+            keyPoints: [
+              'Very long 120-day notice window required to prevent auto-renewal.',
+              'Auto-renews for a full 36 months rather than 12 months.'
+            ],
+            originalText: '3. AUTO-RENEWAL & LOCK-IN\nThe Initial Term is thirty-six (36) months. Unless Customer provides written notice of non-renewal at least one hundred and twenty (120) days prior to the end of the Initial Term, this Agreement shall automatically renew for successive 36-month periods.'
+          },
+          {
+            id: 'saas-liability',
+            title: 'Low Liability Cap (3 Months Fees)',
+            icon: 'shield-alert',
+            riskLevel: 'High',
+            summary: 'Vendor caps its total liability at just 3 months of fees (€12,000), even if they cause a severe data breach or GDPR violation.',
+            keyPoints: [
+              'Liability cap is only 3 months of fees (industry standard is 12 months).',
+              'No super-cap or carve-out for GDPR / data protection breaches.'
+            ],
+            originalText: '4. LIMITATION OF LIABILITY\nVendor\'s total cumulative liability arising out of this Agreement shall not exceed the fees paid by Customer in the three (3) months immediately preceding the claim, including for data breaches or GDPR violations.'
+          }
+        ]
+      },
+      {
+        id: 'reg-emp-04',
+        contractType: 'Employment & HR',
+        dateAdded: '2026-10-04',
+        contractTitle: 'Senior Executive Employment Agreement',
+        overallRisk: 'Medium',
+        detectedPerspective: {
+          userInput: 'Erik Lindqvist',
+          matchedEntity: 'Erik Lindqvist',
+          definedRole: 'Executive / Employee',
+          counterparty: 'Vanguard FinTech AB (Employer)',
+          matchConfidence: 'Exact Match'
+        },
+        executiveSummary: 'Analyzed from Erik Lindqvist\'s (Executive) perspective: Compensation and severance terms are competitive, but the 18-month post-termination non-compete clause and broad IP assignment covering off-duty inventions require attention.',
+        fullContractText: [
+          'SENIOR EXECUTIVE EMPLOYMENT AGREEMENT',
+          '',
+          '1. POSITION AND COMPENSATION',
+          'Vanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer. Executive shall receive a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30% of annual base salary.',
+          '',
+          '2. NOTICE PERIOD AND SEVERANCE',
+          'The mutual notice period is six (6) months. If Employer terminates Executive without cause, Executive shall receive an additional six (6) months of base salary as severance pay.',
+          '',
+          '3. INTELLECTUAL PROPERTY ASSIGNMENT',
+          'All inventions, software, and concepts created by Executive during the period of employment—whether created during working hours or on Executive\'s personal time and equipment—shall belong exclusively to Employer.',
+          '',
+          '4. POST-TERMINATION NON-COMPETE',
+          'For a period of eighteen (18) months following termination of employment for any reason, Executive shall not engage in, work for, or advise any competing financial technology business within the European Economic Area (EEA).'
+        ].join('\n'),
+        categories: [
+          {
+            id: 'emp-comp',
+            title: 'Role & Compensation Package',
+            icon: 'credit-card',
+            riskLevel: 'Low',
+            summary: 'Base salary of 95,000 SEK/month as Chief Product Officer with up to 30% annual performance bonus.',
+            keyPoints: [
+              '95,000 SEK monthly base salary.',
+              'Up to 30% annual target bonus.'
+            ],
+            originalText: '1. POSITION AND COMPENSATION\nVanguard FinTech AB ("Employer") hereby employs Erik Lindqvist ("Executive") as Chief Product Officer. Executive shall receive a fixed monthly base salary of 95,000 SEK plus an annual performance bonus of up to 30% of annual base salary.'
+          },
+          {
+            id: 'emp-notice',
+            title: 'Notice Period & Severance',
+            icon: 'calendar',
+            riskLevel: 'Low',
+            summary: 'Provides a 6-month mutual notice period plus 6 months of severance pay if terminated without cause.',
+            keyPoints: [
+              '6 months mutual notice period.',
+              '6 months severance pay upon termination without cause (12 months total protection).'
+            ],
+            originalText: '2. NOTICE PERIOD AND SEVERANCE\nThe mutual notice period is six (6) months. If Employer terminates Executive without cause, Executive shall receive an additional six (6) months of base salary as severance pay.'
+          },
+          {
+            id: 'emp-ip',
+            title: 'Off-Duty IP Assignment',
+            icon: 'lock',
+            riskLevel: 'Medium',
+            summary: 'Employer claims ownership over all inventions created even during your personal time on personal equipment.',
+            keyPoints: [
+              'Sweeping IP clause covers personal side projects created outside working hours.',
+              'Recommend narrowing to inventions related to Employer\'s business.'
+            ],
+            originalText: '3. INTELLECTUAL PROPERTY ASSIGNMENT\nAll inventions, software, and concepts created by Executive during the period of employment—whether created during working hours or on Executive\'s personal time and equipment—shall belong exclusively to Employer.'
+          },
+          {
+            id: 'emp-noncompete',
+            title: '18-Month EEA Non-Compete',
+            icon: 'alert-triangle',
+            riskLevel: 'High',
+            summary: 'Restricts you from working for any FinTech competitor across the entire EEA for 18 months after leaving, with no mention of mandatory garden-leave compensation.',
+            keyPoints: [
+              '18-month duration exceeds the typical 6–12 month Swedish standard.',
+              'Lacks explicit compensation during the restriction period ( typically 60% of salary).'
+            ],
+            originalText: '4. POST-TERMINATION NON-COMPETE\nFor a period of eighteen (18) months following termination of employment for any reason, Executive shall not engage in, work for, or advise any competing financial technology business within the European Economic Area (EEA).'
+          }
+        ]
+      }
+    ];
+
+    let activeInputMode = 'pdf';
+    let selectedPdfFile = null;
+    let currentAnalysisData = null;
+    let activeTabId = null;
+
+    function safeRenderIcons() {
+      if (window.lucide && typeof window.lucide.createIcons === 'function') {
+        window.lucide.createIcons();
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      safeRenderIcons();
+      loadSavedSettings();
+      setupDragAndDrop();
+      updateRegisterBadge();
+    });
+
+    function updateRegisterBadge() {
+      const badge = document.getElementById('registerCountBadge');
+      if (badge) badge.textContent = CONTRACT_REGISTER.length;
+    }
+
+    function updateModelOptions() {
+      const provider = document.getElementById('providerSelect').value;
+      const modelSelect = document.getElementById('modelSelect');
+      modelSelect.innerHTML = (MODELS[provider] || [])
+        .map(m => `<option value="${m.id}">${m.label}</option>`)
+        .join('');
+      toggleCustomModelInput();
+    }
+
+    function toggleCustomModelInput() {
+      const modelSelect = document.getElementById('modelSelect');
+      const customInput = document.getElementById('customModelInput');
+      if (modelSelect.value === 'custom') {
+        customInput.classList.remove('hidden');
+      } else {
+        customInput.classList.add('hidden');
+      }
+    }
+
+    function loadSavedSettings() {
+      const provider = localStorage.getItem('byok_provider') || 'gemini';
+      let model = localStorage.getItem('byok_model') || 'gemini-3.8-flash';
+      const apiKey = localStorage.getItem('byok_api_key') || '';
+
+      if (model.startsWith('gemini-2.5')) {
+        model = 'gemini-3.8-flash';
+        localStorage.setItem('byok_model', model);
+      }
+
+      document.getElementById('providerSelect').value = provider;
+      updateModelOptions();
+
+      const availableIds = (MODELS[provider] || []).map(m => m.id);
+      if (availableIds.includes(model)) {
+        document.getElementById('modelSelect').value = model;
+      } else {
+        document.getElementById('modelSelect').value = 'custom';
+        document.getElementById('customModelInput').value = model;
+      }
+      toggleCustomModelInput();
+
+      document.getElementById('apiKeyInput').value = apiKey;
+      updateApiStatusIndicator();
+    }
+
+    function saveApiSettings() {
+      const provider = document.getElementById('providerSelect').value;
+      const selectedOption = document.getElementById('modelSelect').value;
+      const customModel = document.getElementById('customModelInput').value.trim();
+      const model = selectedOption === 'custom' && customModel ? customModel : selectedOption;
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+
+      localStorage.setItem('byok_provider', provider);
+      localStorage.setItem('byok_model', model);
+      localStorage.setItem('byok_api_key', apiKey);
+
+      updateApiStatusIndicator();
+      toggleApiModal(false);
+    }
+
+    function clearApiSettings() {
+      localStorage.removeItem('byok_api_key');
+      document.getElementById('apiKeyInput').value = '';
+      updateApiStatusIndicator();
+    }
+
+    function updateApiStatusIndicator() {
+      const apiKey = localStorage.getItem('byok_api_key');
+      const provider = localStorage.getItem('byok_provider') || 'gemini';
+      const dot = document.getElementById('apiStatusDot');
+      const text = document.getElementById('apiStatusText');
+
+      if (apiKey && apiKey.length > 8) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+        const names = { gemini: 'Gemini', openai: 'OpenAI', claude: 'Claude' };
+        text.textContent = `${names[provider]} Ready`;
+      } else {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+        text.textContent = 'API Key (BYOK)';
+      }
+    }
+
+    function toggleApiModal(show) {
+      const modal = document.getElementById('apiModal');
+      if (show) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function switchInputTab(mode) {
+      activeInputMode = mode;
+      const tabPdf = document.getElementById('tabPdf');
+      const tabText = document.getElementById('tabText');
+      const pdfArea = document.getElementById('pdfInputArea');
+      const textArea = document.getElementById('textInputArea');
+
+      if (mode === 'pdf') {
+        tabPdf.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-2';
+        tabText.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
+        pdfArea.classList.remove('hidden');
+        textArea.classList.add('hidden');
+      } else {
+        tabText.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg bg-white text-slate-900 shadow-sm transition flex items-center justify-center gap-2';
+        tabPdf.className = 'flex-1 py-2.5 text-sm font-semibold rounded-lg text-slate-600 hover:text-slate-900 transition flex items-center justify-center gap-2';
+        textArea.classList.remove('hidden');
+        pdfArea.classList.add('hidden');
+      }
+    }
+
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+      if (!dropZone) return;
+
+      ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+          e.preventDefault();
+          dropZone.classList.add('border-indigo-600', 'bg-indigo-50');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, e => {
+          e.preventDefault();
+          dropZone.classList.remove('border-indigo-600', 'bg-indigo-50');
+        });
+      });
+
+      dropZone.addEventListener('drop', e => {
+        const files = e.dataTransfer.files;
+        if (files && files.length > 0) {
+          selectedPdfFile = files[0];
+          document.getElementById('fileNameDisplay').textContent = `Selected file: ${selectedPdfFile.name}`;
+        }
+      });
+    }
+
+    function handleFileSelect(event) {
+      if (event.target.files && event.target.files.length > 0) {
+        selectedPdfFile = event.target.files[0];
+        document.getElementById('fileNameDisplay').textContent = `Selected file: ${selectedPdfFile.name}`;
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('errorText').textContent = msg;
+      document.getElementById('errorBanner').classList.remove('hidden');
+    }
+
+    function hideError() {
+      document.getElementById('errorBanner').classList.add('hidden');
+    }
+
+    // --- CONTRACT REGISTER FUNCTIONS ---
+    function openRegisterView() {
+      hideError();
+      document.getElementById('uploadView').classList.add('hidden');
+      document.getElementById('loadingView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('registerView').classList.remove('hidden');
+      renderRegisterList();
+    }
+
+    function renderRegisterList() {
+      const query = (document.getElementById('registerSearchInput').value || '').toLowerCase().trim();
+      const typeFilter = document.getElementById('registerTypeFilter').value;
+      const riskFilter = document.getElementById('registerRiskFilter').value;
+      const grid = document.getElementById('registerGrid');
+
+      const filtered = CONTRACT_REGISTER.filter(item => {
+        const matchesType = typeFilter === 'all' || item.contractType === typeFilter;
+        const matchesRisk = riskFilter === 'all' || (item.overallRisk || '').toLowerCase() === riskFilter.toLowerCase();
+
+        if (!query) return matchesType && matchesRisk;
+
+        const haystack = [
+          item.contractTitle,
+          item.contractType,
+          item.executiveSummary,
+          item.detectedPerspective?.matchedEntity,
+          item.detectedPerspective?.counterparty,
+          item.fullContractText
+        ].join(' ').toLowerCase();
+
+        return matchesType && matchesRisk && haystack.includes(query);
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-2xl border border-slate-200 p-12 text-center">
+            <p class="text-base font-semibold text-slate-800 mb-1">No matching agreements found</p>
+            <p class="text-xs text-slate-500">Try adjusting your search query or risk filter.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(item => {
+        const pov = item.detectedPerspective || {};
+        const clauseCount = (item.categories || []).length;
+        return `
+          <div
+            onclick="openContractFromRegister('${item.id}')"
+            class="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md hover:border-indigo-400 transition cursor-pointer flex flex-col justify-between group"
+          >
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700">
+                  ${item.contractType || 'Commercial Agreement'}
+                </span>
+                <span class="text-xs font-semibold px-3 py-0.5 rounded-full ${getRiskBadgeClasses(item.overallRisk)}">
+                  ${item.overallRisk || 'Medium'} Risk
+                </span>
+              </div>
+
+              <h3 class="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition mb-2">
+                ${item.contractTitle}
+              </h3>
+
+              <p class="text-xs text-slate-600 line-clamp-2 mb-4 leading-relaxed">
+                ${item.executiveSummary || ''}
+              </p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <div class="truncate pr-2">
+                <span class="font-semibold text-slate-700">POV:</span> ${pov.matchedEntity || 'Balanced'}
+                ${pov.counterparty ? `<span class="text-slate-400"> vs. ${pov.counterparty}</span>` : ''}
+              </div>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="text-[11px] text-slate-400">${item.dateAdded || 'Saved'}</span>
+                <span class="font-semibold text-indigo-600 flex items-center gap-1 group-hover:translate-x-0.5 transition">
+                  <span>Open (${clauseCount})</span>
+                  <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      safeRenderIcons();
+    }
+
+    function openContractFromRegister(id) {
+      const found = CONTRACT_REGISTER.find(c => c.id === id);
+      if (!found) return;
+      document.getElementById('registerView').classList.add('hidden');
+      renderDashboard(found);
+    }
+
+    async function analyzeContract() {
+      hideError();
+      const apiKey = localStorage.getItem('byok_api_key');
+      const provider = localStorage.getItem('byok_provider') || 'gemini';
+      let model = localStorage.getItem('byok_model') || MODELS[provider][0].id;
+      const userParty = document.getElementById('userPartyInput').value.trim();
+
+      if (model.startsWith('gemini-2.5')) {
+        model = 'gemini-3.8-flash';
+        localStorage.setItem('byok_model', model);
+      }
+
+      if (!apiKey) {
+        toggleApiModal(true);
+        showError('Please enter your API key (OpenAI, Gemini, or Claude) to analyze a custom contract, or explore the "Contract Register" in the top bar.');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('provider', provider);
+      formData.append('model', model);
+      formData.append('apiKey', apiKey);
+      formData.append('userParty', userParty);
+
+      if (activeInputMode === 'pdf') {
+        if (!selectedPdfFile) {
+          return showError('Please select a PDF file first, or switch to the "Paste Contract Text" tab.');
+        }
+        formData.append('file', selectedPdfFile);
+      } else {
+        const text = document.getElementById('contractTextarea').value.trim();
+        if (text.length < 50) {
+          return showError('Please paste a longer contract text (at least 50 characters).');
+        }
+        formData.append('text', text);
+      }
+
+      document.getElementById('uploadView').classList.add('hidden');
+      document.getElementById('registerView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('loadingView').classList.remove('hidden');
+
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to analyze the contract.');
+        }
+
+        // Automatically add newly analyzed contracts to the session Register
+        const newEntry = {
+          id: 'reg-custom-' + Date.now(),
+          contractType: 'Custom Upload',
+          dateAdded: new Date().toISOString().slice(0, 10),
+          ...result
+        };
+        CONTRACT_REGISTER.unshift(newEntry);
+        updateRegisterBadge();
+
+        renderDashboard(newEntry);
+      } catch (err) {
+        document.getElementById('loadingView').classList.add('hidden');
+        document.getElementById('uploadView').classList.remove('hidden');
+        showError(err.message);
+      }
+    }
+
+    function getRiskBadgeClasses(risk) {
+      switch ((risk || '').toLowerCase()) {
+        case 'high':
+          return 'bg-red-50 text-red-700 border border-red-200';
+        case 'medium':
+          return 'bg-amber-50 text-amber-700 border border-amber-200';
+        case 'low':
+          return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        default:
+          return 'bg-slate-100 text-slate-700 border border-slate-200';
+      }
+    }
+
+    function renderDashboard(data) {
+      currentAnalysisData = data;
+      document.getElementById('loadingView').classList.add('hidden');
+      document.getElementById('uploadView').classList.add('hidden');
+      document.getElementById('registerView').classList.add('hidden');
+      document.getElementById('dashboardView').classList.remove('hidden');
+
+      document.getElementById('resContractTitle').textContent = data.contractTitle || 'Contract Analysis';
+      const overallBadge = document.getElementById('resOverallRisk');
+      overallBadge.textContent = `Overall Risk: ${data.overallRisk || 'Medium'}`;
+      overallBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${getRiskBadgeClasses(data.overallRisk)}`;
+
+      document.getElementById('resExecutiveSummary').textContent = data.executiveSummary || '';
+
+      // Populate Detected POV Banner
+      const pov = data.detectedPerspective || {};
+      document.getElementById('povMatchedEntity').textContent = pov.matchedEntity || 'All Parties (Balanced View)';
+      document.getElementById('povDefinedRole').textContent = `Role: ${pov.definedRole || 'Neutral'}`;
+      document.getElementById('povCounterparty').textContent = pov.counterparty ? `vs. ${pov.counterparty}` : '';
+      document.getElementById('povConfidenceBadge').textContent = pov.matchConfidence || 'Auto-Detected POV';
+
+      const listEl = document.getElementById('categoryList');
+      listEl.innerHTML = '';
+
+      // AI Clause Categories
+      (data.categories || []).forEach((cat, index) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `cat-btn-${index}`;
+        btn.onclick = () => selectCategory(index);
+        btn.className = 'w-full text-left p-4 rounded-2xl border transition flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-indigo-300';
+        btn.innerHTML = `
+          <div class="flex items-center gap-3.5 min-w-0">
+            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center shrink-0">
+              <i data-lucide="${cat.icon || 'file-text'}" class="w-5 h-5"></i>
+            </div>
+            <div class="truncate">
+              <p class="font-semibold text-sm text-slate-900 truncate">${cat.title}</p>
+              <p class="text-xs text-slate-500 truncate">${cat.summary}</p>
+            </div>
+          </div>
+          <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full shrink-0 ${getRiskBadgeClasses(cat.riskLevel)}">
+            ${cat.riskLevel || 'Info'}
+          </span>
+        `;
+        listEl.appendChild(btn);
+      });
+
+      // Add horizontal separator
+      const separator = document.createElement('div');
+      separator.className = 'my-2 border-b border-slate-200';
+      listEl.appendChild(separator);
+
+      // Add Full Agreement Tab below the clauses
+      const fullDocBtn = document.createElement('button');
+      fullDocBtn.type = 'button';
+      fullDocBtn.id = 'cat-btn-full-doc';
+      fullDocBtn.onclick = () => showFullAgreement();
+      fullDocBtn.className = 'w-full text-left p-4 rounded-2xl border transition flex items-center justify-between gap-3 bg-slate-800 border-slate-700 hover:bg-slate-700 shadow-sm';
+      fullDocBtn.innerHTML = `
+        <div class="flex items-center gap-3.5 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-slate-700/50 text-slate-200 flex items-center justify-center shrink-0 border border-slate-600">
+            <i data-lucide="book-open" class="w-5 h-5"></i>
+          </div>
+          <div class="truncate">
+            <p class="font-semibold text-sm text-white truncate">Full Agreement Document</p>
+            <p class="text-xs text-slate-400 truncate">Read the unedited contract text</p>
+          </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 shrink-0"></i>
+      `;
+      listEl.appendChild(fullDocBtn);
+
+      // Populate Full Agreement Content
+      const fullText = data.fullContractText || '';
+      document.getElementById('fullAgreementContent').textContent = fullText || 'Full agreement text is not available.';
+      document.getElementById('fullTextSearchInput').value = '';
+      document.getElementById('searchMatchCount').textContent = '';
+
+      safeRenderIcons();
+      
+      if (data.categories && data.categories.length > 0) {
+        selectCategory(0);
+      }
+    }
+
+    function clearTabStyles() {
+      const categories = currentAnalysisData.categories || [];
+      categories.forEach((_, idx) => {
+        const btn = document.getElementById(`cat-btn-${idx}`);
+        if (btn) btn.className = 'w-full text-left p-4 rounded-2xl border transition flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-indigo-300';
+      });
+
+      const fullBtn = document.getElementById('cat-btn-full-doc');
+      if (fullBtn) fullBtn.className = 'w-full text-left p-4 rounded-2xl border transition flex items-center justify-between gap-3 bg-slate-800 border-slate-700 hover:bg-slate-700 shadow-sm';
+    }
+
+    function selectCategory(index) {
+      activeTabId = index;
+      clearTabStyles();
+
+      const activeBtn = document.getElementById(`cat-btn-${index}`);
+      if (activeBtn) {
+        activeBtn.className = 'w-full text-left p-4 rounded-2xl border-2 transition flex items-center justify-between gap-3 bg-indigo-50/60 border-indigo-600 shadow-xs';
+      }
+
+      document.getElementById('categoryDetailState').classList.remove('hidden');
+      document.getElementById('fullAgreementState').classList.add('hidden');
+
+      const cat = currentAnalysisData.categories[index];
+      if (!cat) return;
+
+      document.getElementById('detailTitle').textContent = cat.title;
+      document.getElementById('detailSummary').textContent = cat.summary;
+
+      const riskBadge = document.getElementById('detailRiskBadge');
+      riskBadge.textContent = `Risk: ${cat.riskLevel || 'Info'}`;
+      riskBadge.className = `text-xs font-semibold px-3 py-1 rounded-full ${getRiskBadgeClasses(cat.riskLevel)}`;
+
+      const pointsEl = document.getElementById('detailKeyPoints');
+      pointsEl.innerHTML = (cat.keyPoints || [])
+        .map(pt => `<li class="flex items-start gap-2"><span class="text-indigo-600 font-bold">•</span><span>${pt}</span></li>`)
+        .join('');
+
+      document.getElementById('detailOriginalText').textContent = cat.originalText || 'No verbatim quote available.';
+    }
+
+    function showFullAgreement() {
+      activeTabId = 'full-doc';
+      clearTabStyles();
+
+      const activeBtn = document.getElementById('cat-btn-full-doc');
+      if (activeBtn) {
+        activeBtn.className = 'w-full text-left p-4 rounded-2xl border-2 transition flex items-center justify-between gap-3 bg-slate-900 border-slate-400 shadow-md ring-2 ring-slate-200/50';
+      }
+
+      document.getElementById('categoryDetailState').classList.add('hidden');
+      document.getElementById('fullAgreementState').classList.remove('hidden');
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function highlightFullText() {
+      if (!currentAnalysisData || !currentAnalysisData.fullContractText) return;
+      const rawText = currentAnalysisData.fullContractText;
+      const query = document.getElementById('fullTextSearchInput').value.trim();
+      const container = document.getElementById('fullAgreementContent');
+      const countEl = document.getElementById('searchMatchCount');
+
+      if (!query) {
+        container.textContent = rawText;
+        countEl.textContent = '';
+        return;
+      }
+
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${escapedQuery})`, 'gi');
+      const matches = rawText.match(regex);
+      countEl.textContent = matches ? `${matches.length} found` : '0 found';
+
+      const safeHtml = escapeHtml(rawText).replace(
+        new RegExp(`(${escapeHtml(escapedQuery)})`, 'gi'),
+        '<mark class="bg-amber-200 text-slate-900 px-0.5 rounded">$1</mark>'
+      );
+      container.innerHTML = safeHtml;
+    }
+
+    function copyFullAgreement() {
+      if (!currentAnalysisData || !currentAnalysisData.fullContractText) return;
+      navigator.clipboard.writeText(currentAnalysisData.fullContractText);
+      const btn = document.getElementById('copyFullTextBtn');
+      const originalHtml = btn.innerHTML;
+      btn.textContent = 'Copied!';
+      setTimeout(() => {
+        btn.innerHTML = originalHtml;
+        safeRenderIcons();
+      }, 1500);
+    }
+
+    function resetToUpload() {
+      hideError();
+      document.getElementById('dashboardView').classList.add('hidden');
+      document.getElementById('loadingView').classList.add('hidden');
+      document.getElementById('registerView').classList.add('hidden');
+      document.getElementById('uploadView').classList.remove('hidden');
+    }
+
+    function fillSampleText() {
+      document.getElementById('contractTextarea').value = DEMO_CONTRACT_TEXT;
+      if (!document.getElementById('userPartyInput').value.trim()) {
+        document.getElementById('userPartyInput').value = 'NextGen Dev Studio';
+      }
+    }
+
+    function loadDemoResult() {
+      hideError();
+      openContractFromRegister('reg-msa-01');
+    }
+  </script>
+</body>
+</html>
