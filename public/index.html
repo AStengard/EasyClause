@@ -168,7 +168,7 @@
             </div>
             <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">Saved Agreements Register</h1>
             <p class="text-sm text-slate-600 mt-1">
-              Search, filter, and inspect pre-loaded commercial agreements—or view contracts you have analyzed during this session.
+              Search, filter, and sort pre-loaded commercial agreements—or view contracts you have analyzed during this session.
             </p>
           </div>
           <button
@@ -192,17 +192,6 @@
               oninput="renderRegisterList()"
               placeholder="Search title, party, keyword..."
               class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
-
-          <!-- Date Filter -->
-          <div class="sm:col-span-3 relative">
-            <i data-lucide="calendar" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-            <input
-              id="registerDateFilter"
-              type="date"
-              onchange="renderRegisterList()"
-              class="w-full rounded-xl border border-slate-300 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700 bg-white"
             />
           </div>
 
@@ -233,6 +222,22 @@
               <option value="High">High Risk</option>
               <option value="Medium">Medium Risk</option>
               <option value="Low">Low Risk</option>
+            </select>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="sm:col-span-3">
+            <select
+              id="registerSort"
+              onchange="renderRegisterList()"
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-slate-700"
+            >
+              <option value="date-desc">Sort: Date (Newest first)</option>
+              <option value="date-asc">Sort: Date (Oldest first)</option>
+              <option value="title-asc">Sort: Title (A-Z)</option>
+              <option value="party-asc">Sort: Party (A-Z)</option>
+              <option value="risk-desc">Sort: Risk (High to Low)</option>
+              <option value="risk-asc">Sort: Risk (Low to High)</option>
             </select>
           </div>
         </div>
@@ -1000,19 +1005,17 @@
 
     function renderRegisterList() {
       const query = (document.getElementById('registerSearchInput').value || '').toLowerCase().trim();
-      const dateFilter = document.getElementById('registerDateFilter').value;
       const typeFilter = document.getElementById('registerTypeFilter').value;
       const riskFilter = document.getElementById('registerRiskFilter').value;
+      const sortMode = document.getElementById('registerSort').value;
       const grid = document.getElementById('registerGrid');
 
-      const filtered = CONTRACT_REGISTER.filter(item => {
+      // Filter
+      let filtered = CONTRACT_REGISTER.filter(item => {
         const matchesType = typeFilter === 'all' || item.contractType === typeFilter;
         const matchesRisk = riskFilter === 'all' || (item.overallRisk || '').toLowerCase() === riskFilter.toLowerCase();
         
-        // Exact string match for YYYY-MM-DD
-        const matchesDate = !dateFilter || item.dateAdded === dateFilter;
-
-        if (!query) return matchesType && matchesRisk && matchesDate;
+        if (!query) return matchesType && matchesRisk;
 
         const haystack = [
           item.contractTitle,
@@ -1023,14 +1026,40 @@
           item.fullContractText
         ].join(' ').toLowerCase();
 
-        return matchesType && matchesRisk && matchesDate && haystack.includes(query);
+        return matchesType && matchesRisk && haystack.includes(query);
+      });
+
+      // Sort
+      filtered.sort((a, b) => {
+        if (sortMode === 'date-desc') {
+          return new Date(b.dateAdded) - new Date(a.dateAdded);
+        } else if (sortMode === 'date-asc') {
+          return new Date(a.dateAdded) - new Date(b.dateAdded);
+        } else if (sortMode === 'title-asc') {
+          return (a.contractTitle || '').localeCompare(b.contractTitle || '');
+        } else if (sortMode === 'party-asc') {
+          const partyA = (a.detectedPerspective?.matchedEntity || 'Balanced');
+          const partyB = (b.detectedPerspective?.matchedEntity || 'Balanced');
+          return partyA.localeCompare(partyB);
+        } else if (sortMode === 'risk-desc') {
+          const riskWeight = { 'high': 3, 'medium': 2, 'low': 1 };
+          const rA = riskWeight[(a.overallRisk || '').toLowerCase()] || 0;
+          const rB = riskWeight[(b.overallRisk || '').toLowerCase()] || 0;
+          return rB - rA;
+        } else if (sortMode === 'risk-asc') {
+          const riskWeight = { 'high': 3, 'medium': 2, 'low': 1 };
+          const rA = riskWeight[(a.overallRisk || '').toLowerCase()] || 0;
+          const rB = riskWeight[(b.overallRisk || '').toLowerCase()] || 0;
+          return rA - rB;
+        }
+        return 0;
       });
 
       if (filtered.length === 0) {
         grid.innerHTML = `
           <div class="bg-white rounded-2xl border border-slate-200 p-12 text-center">
             <p class="text-base font-semibold text-slate-800 mb-1">No matching agreements found</p>
-            <p class="text-xs text-slate-500">Try adjusting your search query, date, or risk filter.</p>
+            <p class="text-xs text-slate-500">Try adjusting your search query, sorting, or risk filter.</p>
           </div>
         `;
         return;
