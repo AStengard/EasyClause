@@ -6,13 +6,12 @@ const path = require('path');
 const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // Max 10 MB PDF
+  limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Function to dynamically build the system prompt with single-pass POV detection
 function buildSystemPrompt(userPartyName) {
   const povInstruction = userPartyName && userPartyName.trim() !== ''
     ? `CRITICAL POV INSTRUCTION: The user's organization or name is "${userPartyName.trim()}".
@@ -55,7 +54,6 @@ The JSON structure must strictly follow this schema:
 }`;
 }
 
-// Lightweight regex pre-scan to give the LLM extra context on where the user's party name appears
 function findPartyMentions(contractText, userPartyName) {
   if (!userPartyName || userPartyName.trim().length < 2) return '';
   const escaped = userPartyName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -88,15 +86,11 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     }
 
     if (!contractText || contractText.trim().length < 50) {
-      return res.status(400).json({
-        error: 'The contract text is too short or could not be extracted (please make sure the PDF is not a scanned image without OCR).'
-      });
+      return res.status(400).json({ error: 'The contract text is too short or could not be extracted.' });
     }
 
     if (!apiKey || !provider) {
-      return res.status(400).json({
-        error: 'Missing API key or AI provider. Click "API Key (BYOK)" in the top right corner.'
-      });
+      return res.status(400).json({ error: 'Missing API key or AI provider.' });
     }
 
     const truncatedText = contractText.slice(0, 120000);
@@ -106,7 +100,6 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
 
     let rawJsonResponse = '';
 
-    // --- OPENAI ---
     if (provider === 'openai') {
       const selectedModel = model || 'gpt-4o-mini';
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -125,15 +118,10 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
           ]
         })
       });
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Error calling OpenAI API.');
-      }
+      if (!response.ok) throw new Error(data.error?.message || 'Error calling OpenAI API.');
       rawJsonResponse = data.choices[0].message.content;
     }
-
-    // --- GOOGLE GEMINI ---
     else if (provider === 'gemini') {
       const selectedModel = model || 'gemini-3.8-flash';
       const cleanModelName = selectedModel.replace(/^models\//, '');
@@ -144,21 +132,13 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
         body: JSON.stringify({
           systemInstruction: { parts: [{ text: systemPrompt }] },
           contents: [{ parts: [{ text: userMessageContent }] }],
-          generationConfig: {
-            responseMimeType: 'application/json',
-            temperature: 0.2
-          }
+          generationConfig: { responseMimeType: 'application/json', temperature: 0.2 }
         })
       });
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Error calling Google Gemini API.');
-      }
+      if (!response.ok) throw new Error(data.error?.message || 'Error calling Google Gemini API.');
       rawJsonResponse = data.candidates[0].content.parts[0].text;
     }
-
-    // --- ANTHROPIC CLAUDE ---
     else if (provider === 'claude') {
       const selectedModel = model || 'claude-3-5-sonnet-latest';
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -173,31 +153,23 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
           max_tokens: 4096,
           temperature: 0.2,
           system: systemPrompt,
-          messages: [
-            { role: 'user', content: `${userMessageContent}\n\nRespond ONLY with valid JSON.` }
-          ]
+          messages: [ { role: 'user', content: `${userMessageContent}\n\nRespond ONLY with valid JSON.` } ]
         })
       });
-
       const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || 'Error calling Anthropic Claude API.');
-      }
+      if (!response.ok) throw new Error(data.error?.message || 'Error calling Anthropic Claude API.');
       rawJsonResponse = data.content[0].text;
     } else {
       return res.status(400).json({ error: 'Invalid AI provider selected.' });
     }
 
     const parsedResult = cleanAndParseJSON(rawJsonResponse);
-    // Attach the full extracted contract text so the user can read the entire agreement on the frontend
     parsedResult.fullContractText = contractText;
     return res.json(parsedResult);
 
   } catch (error) {
     console.error('Analysis error:', error.message);
-    return res.status(500).json({
-      error: error.message || 'An unexpected error occurred while analyzing the contract.'
-    });
+    return res.status(500).json({ error: error.message || 'An unexpected error occurred while analyzing the contract.' });
   }
 });
 
