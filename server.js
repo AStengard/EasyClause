@@ -56,11 +56,13 @@ The JSON structure must strictly follow this schema:
 
 function findPartyMentions(contractText, userPartyName) {
   if (!userPartyName || userPartyName.trim().length < 2) return '';
-  const escaped = userPartyName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const escaped = userPartyName.trim().replace(/[.*+?^${}()|[\]\]/g, '\$&');
   const regex = new RegExp(`.{0,120}${escaped}.{0,120}`, 'gi');
   const matches = contractText.match(regex);
   if (!matches || matches.length === 0) return '';
-  return `\n\n[PRE-SCAN HINT: The user's input "${userPartyName.trim()}" was found in the text near: "${matches.slice(0, 3).join(' ... ')}"]`;
+  return `
+
+[PRE-SCAN HINT: The user's input "${userPartyName.trim()}" was found in the text near: "${matches.slice(0, 3).join(' ... ')}"]`;
 }
 
 function cleanAndParseJSON(rawText) {
@@ -96,7 +98,9 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
     const truncatedText = contractText.slice(0, 120000);
     const systemPrompt = buildSystemPrompt(userParty);
     const preScanHint = findPartyMentions(truncatedText, userParty);
-    const userMessageContent = `Analyze the following contract:${preScanHint}\n\n${truncatedText}`;
+    const userMessageContent = `Analyze the following contract:${preScanHint}
+
+${truncatedText}`;
 
     let rawJsonResponse = '';
 
@@ -153,7 +157,9 @@ app.post('/api/analyze', upload.single('file'), async (req, res) => {
           max_tokens: 4096,
           temperature: 0.2,
           system: systemPrompt,
-          messages: [ { role: 'user', content: `${userMessageContent}\n\nRespond ONLY with valid JSON.` } ]
+          messages: [ { role: 'user', content: `${userMessageContent}
+
+Respond ONLY with valid JSON.` } ]
         })
       });
       const data = await response.json();
