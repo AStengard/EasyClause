@@ -805,6 +805,27 @@
       loadSavedSettings();
       setupDragAndDrop();
       updateRegisterBadge();
+      history.replaceState({ view: 'upload' }, '');
+    });
+
+    window.addEventListener('popstate', (e) => {
+      const state = e.state;
+      if (!state || state.view === 'upload') {
+        resetToUpload(true);
+      } else if (state.view === 'register') {
+        openRegisterView(true);
+      } else if (state.view === 'dashboard') {
+        if (state.id) {
+          const found = CONTRACT_REGISTER.find(c => c.id === state.id);
+          if (found) {
+            renderDashboard(found, true);
+          } else {
+            resetToUpload(true);
+          }
+        } else {
+          resetToUpload(true);
+        }
+      }
     });
 
     function updateRegisterBadge() {
@@ -957,13 +978,14 @@
       document.getElementById('errorBanner').classList.add('hidden');
     }
 
-    function openRegisterView() {
+    function openRegisterView(skipHistory = false) {
       hideError();
       document.getElementById('uploadView').classList.add('hidden');
       document.getElementById('loadingView').classList.add('hidden');
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('registerView').classList.remove('hidden');
       renderRegisterList();
+      if (!skipHistory) history.pushState({ view: 'register' }, '');
     }
 
     function renderRegisterList() {
@@ -1143,12 +1165,13 @@
       }
     }
 
-    function renderDashboard(data) {
+    function renderDashboard(data, skipHistory = false) {
       currentAnalysisData = data;
       document.getElementById('loadingView').classList.add('hidden');
       document.getElementById('uploadView').classList.add('hidden');
       document.getElementById('registerView').classList.add('hidden');
       document.getElementById('dashboardView').classList.remove('hidden');
+      if (!skipHistory) history.pushState({ view: 'dashboard', id: data.id }, '');
 
       document.getElementById('resContractTitle').textContent = data.contractTitle || 'Contract Analysis';
       const overallBadge = document.getElementById('resOverallRisk');
@@ -1418,12 +1441,13 @@
       setTimeout(() => { btn.innerHTML = originalHtml; safeRenderIcons(); }, 1500);
     }
 
-    function resetToUpload() {
+    function resetToUpload(skipHistory = false) {
       hideError();
       document.getElementById('dashboardView').classList.add('hidden');
       document.getElementById('loadingView').classList.add('hidden');
       document.getElementById('registerView').classList.add('hidden');
       document.getElementById('uploadView').classList.remove('hidden');
+      if (!skipHistory) history.pushState({ view: 'upload' }, '');
     }
 
     function fillSampleText() {
